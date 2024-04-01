@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:translator/translator.dart';
 
 void main() {
   runApp(const MyApp());
@@ -40,8 +41,30 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final translator = GoogleTranslator();
+  final englishController = TextEditingController();
+  final slovenianController = TextEditingController();
 
-  String translated = "Hell0";
+  @override
+  void dispose() {
+    englishController.dispose();
+    slovenianController.dispose();
+    super.dispose();
+  }
+
+  Future<void> translateToSlovenian(String text) async {
+    if (text.isNotEmpty) {
+      var translation = await translator.translate(text, from: 'en', to: 'sl');
+      slovenianController.text = translation.toString();
+    }
+  }
+
+  Future<void> translateToEnglish(String text) async {
+    if (text.isNotEmpty) {
+      var translation = await translator.translate(text, from: 'sl', to: 'en');
+      englishController.text = translation.toString();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,37 +87,40 @@ class _MyHomePageState extends State<MyHomePage> {
           padding: const EdgeInsets.all(20),
           children: [
             const Text("English"),
-            const SizedBox(height: 8),
+            const SizedBox(height: 2),
             TextField(
+              controller: englishController,
               style: const TextStyle(
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
               ),
               decoration: const InputDecoration(
                 hintText: "Enter Text",
+                border: InputBorder.none,
               ),
-              onChanged: (text)async{
-                //final translation = await text.translate(
-                // from: 'en',
-                // to: 'es',
-                // );
-
-                setState(() {
-                  //translated = translation.text;
-                });
-              }
+              maxLines: null,
+              onChanged: (text) {
+                translateToSlovenian(text);
+              },
             ),
             const Divider(height: 32),
             const Text("Slovenian"),
             const SizedBox(height: 8),
-            Text(
-              translated,
+            TextField(
+              controller: slovenianController,
               style: const TextStyle(
                 fontSize: 36,
-                color: Colors.black,
                 fontWeight: FontWeight.bold,
               ),
-            )
+              decoration: const InputDecoration(
+                hintText: "Enter Text",
+                border: InputBorder.none,
+              ),
+              maxLines: null,
+              onChanged: (text) {
+                translateToEnglish(text);
+              },
+            ),
           ],
         ),
       ),
